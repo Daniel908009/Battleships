@@ -41,6 +41,42 @@ def place_boat(x, y):
 def check_thread():
     pass
 
+# function to remove the tiles from the game board
+def remove_tiles():
+    for widget in frame.winfo_children():
+        widget.destroy()
+    print("tiles removed")
+
+# function to set the button_pressed variable to True
+def ready_button_change():
+    global button_pressed_temp
+    button_pressed_temp = True
+    print("button pressed")
+
+# function to hold the screen until the bottom button is pressed
+def hold_screen():
+    temp2 = True
+    button_pressed_temp = False
+    # creating the bottom button and text informing the player to press the button if he is ready
+    ready_button = tkinter.Button(button_frame, text="Ready", width=9, height=2, command=lambda: ready_button_change())
+    ready_button.grid(row=0, column=2)
+    ready_label = tkinter.Label(button_frame, text="Press the button when you are ready", font=("Arial", 10))
+    ready_label.grid(row=0, column=3)
+    while temp2:
+        print(button_pressed_temp)
+        if button_pressed_temp:
+            ready_button.grid_remove()
+            ready_label.grid_remove()
+            temp2 = False
+            print("screen released")
+        else:
+            pass
+        print("screen holding")
+        #time.sleep(1)
+        window.update()
+
+    print("screen held")
+
 # function for the placement of the boats faze
 def choose_faze():
     global current_player, boats_placed
@@ -137,6 +173,8 @@ button_frame.pack(side="bottom")
 for i in range(num_of_players):
     #temp = current_player
     choose_faze()
+    remove_tiles()
+    hold_screen()
     print("chose faze started")
     #if current_player != temp:
      #   choose_faze()
