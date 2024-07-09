@@ -8,17 +8,67 @@ import threading
 def reset():
     pass
 
-# function to open the settings window
+# function to open settings window
 def settings():
-    pass
+    global map_size, number_of_boats
+    # settings of the settings window
+    settings_window = tkinter.Toplevel(window)
+    settings_window.title("Settings")
+    settings_window.geometry("400x400")
+    settings_window.resizable(False, False)
+    settings_window.iconbitmap("boat.ico")
+    # creating the main settings label
+    settings_label = tkinter.Label(settings_window, text="Settings", font=("Arial", 20))
+    settings_label.pack(side="top")
+    # creating the frame for the settings
+    settings_frame = tkinter.Frame(settings_window)
+    settings_frame.pack()
+    # creating a setting for the map size
+    e1 = tkinter.StringVar()
+    e1.set(map_size)
+    map_size_label = tkinter.Label(settings_frame, text="Map size", font=("Arial", 12))
+    map_size_label.grid(row=0, column=0)
+    map_size_entry = tkinter.Entry(settings_frame, width=10, textvariable=e1)
+    map_size_entry.grid(row=0, column=1)
+    # creating a setting for the number of boats
+    e2 = tkinter.StringVar()
+    e2.set(number_of_boats)
+    number_of_boats_label = tkinter.Label(settings_frame, text="Number of boats", font=("Arial", 12))
+    number_of_boats_label.grid(row=1, column=0)
+    number_of_boats_entry = tkinter.Entry(settings_frame, width=10, textvariable=e2)
+    number_of_boats_entry.grid(row=1, column=1)
+
+    # creating the apply button
+    apply_button = tkinter.Button(settings_window, text="Apply", width=9, height=2)
+    apply_button.pack(side="bottom")
+
+    settings_window.mainloop()
+    
 
 # function to check if someone has won
 def check_win():
-    pass
+    global number_of_players_boats
+    for i in range(num_of_players):
+        if number_of_players_boats[i] == 0:
+            return True
 
-# function that is called when a button is pressed, basically the main game logic loop
+# function that is called when a button is pressed, basically it handles the guess of a player
 def button_pressed(x, y):
-    pass
+    global number_of_players_boats, current_player
+    if [x, y] in possitions_of_boats[int(current_player)-1]:
+        number_of_players_boats[int(current_player)-1] -= 1
+        print("Hit")
+    else:
+        print("Miss")
+    if check_win():
+        print("Player " + current_player + " has won")
+    else:
+        if current_player == players[0]:
+            current_player = players[1]
+        else:
+            current_player = players[0]
+        main_label.config(text="Player " + current_player + "'s turn")
+        window.update()
 
 # function to select a boat type from the boat selection
 def select_boat(boat_type):
@@ -34,57 +84,57 @@ def check_mouse_coordinates():
 
 # function to place the boats on the game board
 def place_boat(x, y):
-    global boats_placed
-    boats_placed += 1
+    global boats_placed, current_player
+    is_empty = True
+    for i in range(len(possitions_of_boats[int(current_player)-1])):
+        if possitions_of_boats[int(current_player)-1][i] == [x, y]:
+            is_empty = False
+    if is_empty == False:
+        print("Boat already placed here")
+    #possitions_of_boats[int(current_player)-1].append([x, y])
+    else:
+        boats_placed += 1
+        possitions_of_boats[int(current_player)-1].append([x, y])
+    print(possitions_of_boats)
 
 # function for a checking thread
-def check_thread():
-    pass
+#def check_thread():
+    #pass
 
 # function to remove the tiles from the game board
 def remove_tiles():
     for widget in frame.winfo_children():
         widget.destroy()
-    print("tiles removed")
 
 # function to set the button_pressed variable to True
 def ready_button_change():
     global button_pressed_temp
     button_pressed_temp = True
-    print("button pressed")
 
 # function to hold the screen until the bottom button is pressed
 def hold_screen():
     temp2 = True
-    button_pressed_temp = False
+    global button_pressed_temp
     # creating the bottom button and text informing the player to press the button if he is ready
     ready_button = tkinter.Button(button_frame, text="Ready", width=9, height=2, command=lambda: ready_button_change())
     ready_button.grid(row=0, column=2)
-    ready_label = tkinter.Label(button_frame, text="Press the button when you are ready", font=("Arial", 10))
+    ready_label = tkinter.Label(button_frame, text="Press the ready button once you switched places with your oponent", font=("Arial", 12))
     ready_label.grid(row=0, column=3)
     while temp2:
-        print(button_pressed_temp)
         if button_pressed_temp:
             ready_button.grid_remove()
             ready_label.grid_remove()
             temp2 = False
-            print("screen released")
+            button_pressed_temp = False
         else:
             pass
-        print("screen holding")
-        #time.sleep(1)
         window.update()
-
-    print("screen held")
 
 # function for the placement of the boats faze
 def choose_faze():
     global current_player, boats_placed
     temp = True
-    #thread1 = threading.Thread(target=check_thread)
-    #if thread1.is_alive() == False:
-     #   thread1.start()
-    # filling the boat selection frame with buttons representing the boats
+    # creating the buttons for the boat selection
     for i in range(number_of_boats):
         boat_button = tkinter.Button(boat_frame, text=boat_types[i] + " (" + str(boat_sizes[i]) + ")", width=10, height=2, command=lambda i=i: select_boat(boat_types[i]))
         boat_button.grid(row=0, column=i)
@@ -99,22 +149,21 @@ def choose_faze():
             boats_placed = 0
             if current_player == players[0]:
                 current_player = players[1]
-                print("player changed from 1 to 2")
                 temp = False
             else:
                 current_player = players[0]
-                print("player changed from 2 to 1")
                 temp = False
-            print("player changed")
         else:
             pass
-        main_label.config(text="Player " + current_player + "'s turn")
-        #print("function ended")
+        try:
+            main_label.config(text="Player " + current_player + "'s turn")
+        except:
+            pass
         window.update()
-    #print("function ended with a problem")
 
 
 # variables for the map, players, buttons, etc.
+button_pressed_temp = False
 running = True
 map_size = 5
 number_of_tiles = map_size * map_size
@@ -125,6 +174,10 @@ boat_types = ["Carrier", "Battleship", "Cruiser", "Submarine", "Destroyer"]
 boat_sizes = [5, 4, 3, 3, 2]
 players = ["1", "2"]
 current_player = random.choice(players)
+possitions_of_boats = []
+number_of_players_boats = [[number_of_boats],[number_of_boats]]
+for i in range(num_of_players):
+    possitions_of_boats.append([])
 buttons = []
 for i in range(num_of_players):
     buttons.append([])
@@ -132,23 +185,16 @@ for i in range(num_of_players):
         buttons[i].append([])
         for k in range(map_size):
             buttons[i][j].append([])
-#print(buttons)
-#print(len(buttons))
-#print(len(buttons[0]))
-#print(len(buttons[1]))
-#print(len(buttons[0][0]))
-#print(len(buttons[1][0]))
 
 # creating a thread for the mouse coordinates checking
 mouse_thread = threading.Thread(target=check_mouse_coordinates)
-#chose_thread = threading.Thread(target=choose_faze)
 
 # creating the main window of the game
 window = tkinter.Tk()
 window.title("Battleships")
 window.geometry("800x600")
 window.resizable(False, False)
-#window.iconbitmap("battleship.ico")
+window.iconbitmap("boat.ico")
 
 # starting the mouse thread
 #mouse_thread.start()
@@ -169,32 +215,6 @@ boat_frame.pack()
 button_frame = tkinter.Frame(window)
 button_frame.pack(side="bottom")
 
-
-for i in range(num_of_players):
-    #temp = current_player
-    choose_faze()
-    remove_tiles()
-    hold_screen()
-    print("chose faze started")
-    #if current_player != temp:
-     #   choose_faze()
-    #print("chose faze started again")
-    #chose_thread.start()
-    #chose_thread.join()
-    #print("thread ended")
-
-# filling the boat selection frame with buttons representing the boats
-#for i in range(number_of_boats):
- #   boat_button = tkinter.Button(boat_frame, text=boat_types[i] + " (" + str(boat_sizes[i]) + ")", width=10, height=2, command=lambda i=i: select_boat(boat_types[i]))
-  #  boat_button.grid(row=0, column=i)
-
-# creating the chossing buttons for the selected player, basically the game board for the ships of the player
-#for i in range(map_size):
- #   for j in range(map_size):
-  #      buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=10, height=5, command=lambda i=i, j=j: button_pressed(i, j))
-   #     buttons[int(current_player)-1][i][j].grid(row=i, column=j)
-
-
 # creating the reset button and settings button
 reset_button = tkinter.Button(button_frame, text="Reset",width=9, height=2 ,command=lambda: reset())
 reset_button.grid(row=0, column=0)
@@ -202,7 +222,29 @@ settings_button = tkinter.Button(button_frame, text="Settings", width=9, height=
 settings_button.grid(row=0, column=1)
 
 
+# first faze of the game, the placement of the boats
+for i in range(num_of_players):
+    choose_faze()
+    remove_tiles()
+    hold_screen()
 
-print("window updated")
+# second faze of the game, the actual game(guessing the possition of the ships)
+#while True:
+ #   for i in range(map_size):
+  #      for j in range(map_size):
+   #         buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=10, height=5, command=lambda i=i, j=j: button_pressed(i, j))
+    #        buttons[int(current_player)-1][i][j].grid(row=i, column=j)
+   # if check_win():
+    #    break
+    #else:
+    #    pass
+    #try:
+    #    main_label.config(text="Player " + current_player + "'s turn")
+    #except:
+    #    pass
+    #window.update()
+
+
+
 #mouse_thread.join()
 window.mainloop()
