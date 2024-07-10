@@ -85,16 +85,23 @@ def select_boat(boat_type):
         if i != boat_index:
             boat_button[i].config(relief="raised")
 
-
-    
-
-# function that will continuously check mouse coordinates, this will be used to place the boats on the game board
-def check_mouse_coordinates():
-    while running:
-        x, y = window.winfo_pointerxy()
-        print(x, y)
-        time.sleep(2)
-    return None
+# function to check if the tiles selected for the boat are next to each other
+def tile_next_to_each_other(possitions):
+    temp = True
+    for i in range(len(possitions)-1):
+        if possitions[i][0] == possitions[i+1][0] and possitions[i][1] == possitions[i+1][1] - 1:
+            temp = True
+        elif possitions[i][0] == possitions[i+1][0] and possitions[i][1] == possitions[i+1][1] + 1:
+            temp = True
+        elif possitions[i][0] == possitions[i+1][0] - 1 and possitions[i][1] == possitions[i+1][1]:
+            temp = True
+        elif possitions[i][0] == possitions[i+1][0] + 1 and possitions[i][1] == possitions[i+1][1]:
+            temp = True
+        else:
+            temp = False
+            break
+    print(temp)
+    return temp
 
 # function to place the boats on the game board
 def place_boat(x, y):
@@ -105,27 +112,33 @@ def place_boat(x, y):
     for i in range(len(boat_types)):
         if boat_button[i].config("relief")[-1] == "sunken":
             boat_size = boat_sizes[i]
-            print(boat_size)
+            #print(boat_size)
  # if no boat is selected, the player will be informed and the function will return None
     if boat_size == 0:
         print("No boat selected")
         return None
     else:
         while number_of_tiles_selected != boat_size:
-            print(boat_size, number_of_tiles_selected)
+            #print(boat_size, number_of_tiles_selected)
             # checking if the boat is already placed on the selected tile
             for i in range(len(possitions_of_boats[int(current_player)-1])):
                 if possitions_of_boats[int(current_player)-1][i] == [x, y]:
                     is_empty = False
+            for i in range(len(possitions_of_boats_temp)):
+                if possitions_of_boats_temp[i] == [x, y]:
+                    is_empty = False
             if is_empty == False:
-                print("Boat already placed here")
+                #print("Boat already placed here") eventually add a label that will inform the player that the boat is already placed here
                 is_empty = True
             #possitions_of_boats[int(current_player)-1].append([x, y])
             else:
                 number_of_tiles_selected += 1
                 possitions_of_boats_temp.append([x, y])
-                if number_of_tiles_selected == boat_size:
+                buttons[int(current_player)-1][x][y].config(bg="green")
+                #print(number_of_tiles_selected, boat_size)
+                if number_of_tiles_selected == boat_size and tile_next_to_each_other(possitions_of_boats_temp):
                     boats_placed += 1
+                    print("Boat placed")
                     #number_of_tiles_selected = 0
                     # dissabling the boat select button and changing the relief of the selected button and making it red
                     for i in range(len(boat_types)):
@@ -135,12 +148,19 @@ def place_boat(x, y):
                             boat_button[i].config(bg="red")
                     print("Boat placed")
                     break
-            print(possitions_of_boats)
+                if tile_next_to_each_other(possitions_of_boats_temp) == False:
+                    print("Tiles are not next to each other")
+                    buttons[int(current_player)-1][x][y].config(bg="white")
+                    number_of_tiles_selected = 0
+                    possitions_of_boats_temp.clear()
+                    break
+            #print(possitions_of_boats)
             window.update()
             #time.sleep(1)
         # add the possitions of the boats to the actual list of the possitions of the boats(this is done because the positions are first checked if they are next to each other)
         for i in range(len(possitions_of_boats_temp)):
             possitions_of_boats[int(current_player)-1].append(possitions_of_boats_temp[i])
+            print(possitions_of_boats)
         possitions_of_boats_temp.clear()
         number_of_tiles_selected = 0
 
@@ -235,9 +255,6 @@ for i in range(num_of_players):
         buttons[i].append([])
         for k in range(map_size):
             buttons[i][j].append([])
-
-# creating a thread for the mouse coordinates checking
-mouse_thread = threading.Thread(target=check_mouse_coordinates)
 
 # creating the main window of the game
 window = tkinter.Tk()
