@@ -87,7 +87,9 @@ def select_boat(boat_type):
 
 # function to check if the tiles selected for the boat are next to each other
 def tile_next_to_each_other(possitions):
+    global boat_size, number_of_tiles_selected
     temp = True
+    # checking if the tiles are next to each other
     for i in range(len(possitions)-1):
         if possitions[i][0] == possitions[i+1][0] and possitions[i][1] == possitions[i+1][1] - 1:
             temp = True
@@ -101,6 +103,25 @@ def tile_next_to_each_other(possitions):
             temp = False
             break
     print(temp)
+    return temp
+
+# function to check if all the tiles form a straight line(horizontal or vertical)
+def is_straight(possitions):
+    temp = True
+    main_tile = possitions[0]
+    # checking if the tiles are in a straight line with the first tile being the main tile
+    for i in range(1, len(possitions)):
+        if possitions[i][0] == main_tile[0] and possitions[i][1] == main_tile[1] + 1:
+            temp = True
+        elif possitions[i][0] == main_tile[0] and possitions[i][1] == main_tile[1] - 1:
+            temp = True
+        elif possitions[i][0] == main_tile[0] + 1 and possitions[i][1] == main_tile[1]:
+            temp = True
+        elif possitions[i][0] == main_tile[0] - 1 and possitions[i][1] == main_tile[1]:
+            temp = True
+        else:
+            temp = False
+            break
     return temp
 
 # function to place the boats on the game board
@@ -151,16 +172,31 @@ def place_boat(x, y):
                 if tile_next_to_each_other(possitions_of_boats_temp) == False:
                     print("Tiles are not next to each other")
                     buttons[int(current_player)-1][x][y].config(bg="white")
-                    number_of_tiles_selected = 0
+                    print(possitions_of_boats_temp)
                     possitions_of_boats_temp.clear()
+                    #number_of_tiles_selected = 0
+                    #possitions_of_boats_temp.clear()
                     break
             #print(possitions_of_boats)
             window.update()
             #time.sleep(1)
-        # add the possitions of the boats to the actual list of the possitions of the boats(this is done because the positions are first checked if they are next to each other)
+        #if is_straight(possitions_of_boats_temp):
+            # add the possitions of the boats to the actual list of the possitions of the boats(this is done because the positions are first checked if they are next to each other)    
+        print(possitions_of_boats_temp)
         for i in range(len(possitions_of_boats_temp)):
             possitions_of_boats[int(current_player)-1].append(possitions_of_boats_temp[i])
             print(possitions_of_boats)
+        #else:
+         #   pass
+            # setting the tiles back to white if the tiles are not in a straight line
+            #for i in range(len(possitions_of_boats_temp)):
+                #buttons[int(current_player)-1].config(bg="white")
+            # finding the index of the selected boat and make the button for that boat normal
+            #for i in range(len(boat_types)):
+              #  if boat_button[i].config("relief")[-1] == "sunken":
+                #    boat_button[i].config(relief="raised")
+                 #   break
+            
         possitions_of_boats_temp.clear()
         number_of_tiles_selected = 0
 
