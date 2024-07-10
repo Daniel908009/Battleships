@@ -54,26 +54,35 @@ def check_win():
 
 # function that is called when a button is pressed, basically it handles the guess of a player
 def button_pressed(x, y):
-    global number_of_players_boats, current_player, possitions_of_boats, buttons
-    # marking the button with an X, so the player knows that he has already guessed that tile
-    print("Button pressed: " + str(x) + " " + str(y))
-    #print(buttons[int(current_player)-1][x][y])
-    #buttons[int(current_player)-1][x][y].config(text="X")
-    # logic for hitting or missing a boat
-    if [x, y] in possitions_of_boats[int(current_player)-1]:
-        number_of_players_boats[int(current_player)-1] -= 1
-        print("Hit")
-    else:
-        print("Miss")
+    global current_player, number_of_players_boats, buttons, players
+    print(x, y)
+    print("second faze function called")
+    #print(current_player)
+    #print(players)
+
+    # checking if the player has guessed the tile of the other players boats
+    #for i in range(len(possitions_of_boats[int(players[0])-1])):
+     #   if possitions_of_boats[int(players[0])-1][i] == [x, y]:
+      #      buttons[int(players[0])-1][x][y].config(bg="red")
+       #     number_of_players_boats[int(players[0])-1] -= 1
+        #    print("Hit")
+         #   break
+        #else:
+         #   buttons[int(players[0])-1][x][y].config(bg="blue")
+          #  print("Miss")
+           # break
+    # checking if the player has won
     if check_win():
-        print("Player " + current_player + " has won")
+        print("Player " + current_player + " wins")
+        main_label.config(text="Player " + current_player + " wins")
+        return None
+    
+    # changing the player
+    if current_player == players[0]:
+        current_player = players[1]
     else:
-        if current_player == players[0]:
-            current_player = players[1]
-        else:
-            current_player = players[0]
-        main_label.config(text="Player " + current_player + "'s turn")
-        window.update()
+        current_player = players[0]
+    main_label.config(text="Player " + current_player + "'s turn")
 
 # function to select a boat type from the boat selection
 def select_boat(boat_type):
@@ -134,16 +143,11 @@ def place_boat(x, y):
     global boats_placed, current_player, boat_sizes, number_of_tiles_selected, buttons, boat_size, possitions_of_boats_temp
     is_empty = True
     boat_size = 0
-    #try:
-    #    print(len(possitions_of_boats_temp[0]))
-    #    print(len(possitions_of_boats_temp[1]))
-    #except:
-    #    pass
     # finding the size of the selected boat, this will be used to check if the entire boat has been placed
     for i in range(len(boat_types)):
         if boat_button[i].config("relief")[-1] == "sunken":
             boat_size = boat_sizes[i]
-            #print(boat_size)
+
  # if no boat is selected, the player will be informed and the function will return None
     if boat_size == 0:
         print("No boat selected")
@@ -161,16 +165,13 @@ def place_boat(x, y):
             if is_empty == False:
                 #print("Boat already placed here") eventually add a label that will inform the player that the boat is already placed here
                 is_empty = True
-            #possitions_of_boats[int(current_player)-1].append([x, y])
             else:
                 number_of_tiles_selected += 1
                 possitions_of_boats_temp.append([x, y])
                 buttons[int(current_player)-1][x][y].config(bg="green")
-                #print(number_of_tiles_selected, boat_size)
                 if number_of_tiles_selected == boat_size and tile_next_to_each_other(possitions_of_boats_temp):
                     boats_placed += 1
                     print("Boat placed")
-                    #number_of_tiles_selected = 0
                     # dissabling the boat select button and changing the relief of the selected button and making it red
                     for i in range(len(boat_types)):
                         if boat_button[i].config("relief")[-1] == "sunken":
@@ -180,40 +181,24 @@ def place_boat(x, y):
                     print("Boat placed")
                     break
                 if tile_next_to_each_other(possitions_of_boats_temp) == False:
-                    print(possitions_of_boats_temp)
                     print("Tiles are not next to each other")
                     buttons[int(current_player)-1][x][y].config(bg="white")
                     print(possitions_of_boats_temp)
                     possitions_of_boats_temp.clear()
-                    #number_of_tiles_selected = 0
-                    #possitions_of_boats_temp.clear()
+                    print("temp cleared")
                     break
-            #print(possitions_of_boats)
             window.update()
-            #time.sleep(1)
-        #if is_straight(possitions_of_boats_temp):
-            # add the possitions of the boats to the actual list of the possitions of the boats(this is done because the positions are first checked if they are next to each other)    
-        #print(possitions_of_boats_temp)
+
+        # add the possitions of the boats to the actual list of the possitions of the boats(this is done because the positions are first checked if they are next to each other)    
         for i in range(len(possitions_of_boats_temp)):
             possitions_of_boats[int(current_player)-1].append(possitions_of_boats_temp[i])
-            #print(possitions_of_boats)
         # end this function if the boats are all placed
         if boats_placed == len(boat_types):
             print(boats_placed, len(boat_types))
             possitions_of_boats_temp.clear()
+            print("temp cleared")
             number_of_tiles_selected = 0
-            #window.update()
             return None
-        #else:
-         #   pass
-            # setting the tiles back to white if the tiles are not in a straight line
-            #for i in range(len(possitions_of_boats_temp)):
-                #buttons[int(current_player)-1].config(bg="white")
-            # finding the index of the selected boat and make the button for that boat normal
-            #for i in range(len(boat_types)):
-              #  if boat_button[i].config("relief")[-1] == "sunken":
-                #    boat_button[i].config(relief="raised")
-                 #   break
             
         possitions_of_boats_temp.clear()
         print("temp cleared")
@@ -265,6 +250,7 @@ def choose_faze():
         for j in range(map_size):
             buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=10, height=5, command=lambda i=i, j=j: place_boat(i, j))
             buttons[int(current_player)-1][i][j].grid(row=i, column=j)
+
     # holding the screen until the player places all of his boats
     while temp:
         if boats_placed == len(boat_types):
