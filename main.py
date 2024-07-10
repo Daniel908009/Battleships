@@ -72,12 +72,8 @@ def button_pressed(x, y):
 
 # function to select a boat type from the boat selection
 def select_boat(boat_type):
-    #global boat_button
     boat_selected = boat_type
-    # making the selected boat button stay pressed
-    #print(boat_button)
     print(boat_selected)
-    #boat_button[i].config(relief="sunken")
     # finding the index of the selected boat
     for i in range(len(boat_types)):
         if boat_selected == boat_types[i]:
@@ -102,46 +98,51 @@ def check_mouse_coordinates():
 
 # function to place the boats on the game board
 def place_boat(x, y):
-    global boats_placed, current_player, boat_sizes, number_of_tiles_selected, buttons
+    global boats_placed, current_player, boat_sizes, number_of_tiles_selected, buttons, boat_size, possitions_of_boats_temp
     is_empty = True
+    boat_size = 0
     # finding the size of the selected boat, this will be used to check if the entire boat has been placed
     for i in range(len(boat_types)):
         if boat_button[i].config("relief")[-1] == "sunken":
             boat_size = boat_sizes[i]
-    print(boat_size)
-    while number_of_tiles_selected != boat_size:
-        print(boat_size, number_of_tiles_selected)
-        # checking if the boat is already placed on the selected tile
-        for i in range(len(possitions_of_boats[int(current_player)-1])):
-            if possitions_of_boats[int(current_player)-1][i] == [x, y]:
-                is_empty = False
-        if is_empty == False:
-            print("Boat already placed here")
-            is_empty = True
-        #possitions_of_boats[int(current_player)-1].append([x, y])
-        else:
-            number_of_tiles_selected += 1
-            possitions_of_boats[int(current_player)-1].append([x, y])
-            if number_of_tiles_selected == boat_size:
-                boats_placed += 1
-                #number_of_tiles_selected = 0
-                # dissabling the boat select button and changing the relief of the selected button and making it red
-                for i in range(len(boat_types)):
-                    if boat_button[i].config("relief")[-1] == "sunken":
-                        boat_button[i].config(relief="raised")
-                        boat_button[i].config(state="disabled")
-                        boat_button[i].config(bg="red")
-                print("Boat placed")
-                break
-            #print(number_of_tiles_selected)
-        print(possitions_of_boats)
-        window.update()
-        time.sleep(1)
-    number_of_tiles_selected = 0
-
-# function for a checking thread
-#def check_thread():
-    #pass
+            print(boat_size)
+ # if no boat is selected, the player will be informed and the function will return None
+    if boat_size == 0:
+        print("No boat selected")
+        return None
+    else:
+        while number_of_tiles_selected != boat_size:
+            print(boat_size, number_of_tiles_selected)
+            # checking if the boat is already placed on the selected tile
+            for i in range(len(possitions_of_boats[int(current_player)-1])):
+                if possitions_of_boats[int(current_player)-1][i] == [x, y]:
+                    is_empty = False
+            if is_empty == False:
+                print("Boat already placed here")
+                is_empty = True
+            #possitions_of_boats[int(current_player)-1].append([x, y])
+            else:
+                number_of_tiles_selected += 1
+                possitions_of_boats_temp.append([x, y])
+                if number_of_tiles_selected == boat_size:
+                    boats_placed += 1
+                    #number_of_tiles_selected = 0
+                    # dissabling the boat select button and changing the relief of the selected button and making it red
+                    for i in range(len(boat_types)):
+                        if boat_button[i].config("relief")[-1] == "sunken":
+                            boat_button[i].config(relief="raised")
+                            boat_button[i].config(state="disabled")
+                            boat_button[i].config(bg="red")
+                    print("Boat placed")
+                    break
+            print(possitions_of_boats)
+            window.update()
+            #time.sleep(1)
+        # add the possitions of the boats to the actual list of the possitions of the boats(this is done because the positions are first checked if they are next to each other)
+        for i in range(len(possitions_of_boats_temp)):
+            possitions_of_boats[int(current_player)-1].append(possitions_of_boats_temp[i])
+        possitions_of_boats_temp.clear()
+        number_of_tiles_selected = 0
 
 # function to remove the tiles from the game board
 def remove_tiles():
@@ -196,11 +197,9 @@ def choose_faze():
             if current_player == players[0]:
                 current_player = players[1]
                 temp = False
-                #boat_button.clear()
             else:
                 current_player = players[0]
                 temp = False
-                #boat_button.clear()
         else:
             pass
         try:
@@ -225,6 +224,7 @@ boat_sizes = [5, 4, 3, 3, 2]
 players = ["1", "2"]
 current_player = random.choice(players)
 possitions_of_boats = []
+possitions_of_boats_temp = []
 number_of_players_boats = [[number_of_boats],[number_of_boats]]
 for i in range(num_of_players):
     possitions_of_boats.append([])
@@ -245,9 +245,6 @@ window.title("Battleships")
 window.geometry("800x600")
 window.resizable(False, False)
 window.iconbitmap("boat.ico")
-
-# starting the mouse thread
-#mouse_thread.start()
 
 # creating a top label for the game, displaying the current player
 main_label = tkinter.Label(window, text="Player " + current_player + "'s turn", font=("Arial", 20))
@@ -296,5 +293,4 @@ for i in range(num_of_players):
 
 
 
-#mouse_thread.join()
 window.mainloop()
