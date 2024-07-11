@@ -54,23 +54,40 @@ def check_win():
 
 # function that is called when a button is pressed, basically it handles the guess of a player
 def button_pressed(x, y):
-    global current_player, number_of_players_boats, buttons, players
+    global current_player, number_of_players_boats, buttons, players, possitions_of_boats
+    # creating a variable to hold the answer
+    answer = "Miss"
+    # creating a variable to hold the other player
+    other_player = 0
+    if current_player == players[0]:
+        other_player = players[1]
+    else:
+        other_player = players[0]
+    print(possitions_of_boats[int(current_player)-1])
+    print(possitions_of_boats[int(other_player)-1])
     print(x, y)
     print("second faze function called")
-    #print(current_player)
-    #print(players)
+    print(current_player)
+    print(other_player)
+    # checking if the player has hit a boat of the other player
+    for i in range(len(possitions_of_boats[int(other_player)-1])):
+        if possitions_of_boats[int(other_player)-1][i] == [x, y]:
+            #buttons[int(current_player)-1][x][y].config(bg="red")
+            #number_of_players_boats[int(other_player)-1] -= 1
+            print(possitions_of_boats[int(other_player)-1])
+            print(current_player)
+            print(x, y)
+            print("Hit")
+            answer = "Hit"
+            break
+        else:
+            #buttons[int(current_player)-1][x][y].config(bg="blue")
+            print(possitions_of_boats[int(other_player)-1][i])
+            print(x, y)
+            print("Miss")
+    print(answer + " answer is this" )
+    window.update()
 
-    # checking if the player has guessed the tile of the other players boats
-    #for i in range(len(possitions_of_boats[int(players[0])-1])):
-     #   if possitions_of_boats[int(players[0])-1][i] == [x, y]:
-      #      buttons[int(players[0])-1][x][y].config(bg="red")
-       #     number_of_players_boats[int(players[0])-1] -= 1
-        #    print("Hit")
-         #   break
-        #else:
-         #   buttons[int(players[0])-1][x][y].config(bg="blue")
-          #  print("Miss")
-           # break
     # checking if the player has won
     if check_win():
         print("Player " + current_player + " wins")
