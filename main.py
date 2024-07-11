@@ -54,8 +54,11 @@ def check_win():
 
 # function that is called when a button is pressed, basically it handles the guess of a player
 def button_pressed(x, y):
-    global current_player, number_of_players_boats, buttons, players, possitions_of_boats, which_tiles_tried, tiles_hit
+    global current_player, number_of_players_boats, buttons, players, possitions_of_boats, which_tiles_tried, tiles_hit, coords_of_boats, tiles_of_sunken_boats
     widgets = []
+    print(str(coords_of_boats) + "coords of boats")
+    print(coords_of_boats[int(current_player)-1])
+    print(coords_of_boats[int(current_player)-1][0])
     # creating a variable to hold the answer
     answer = "Miss"
     # creating a variable to hold the other player
@@ -92,6 +95,12 @@ def button_pressed(x, y):
                 else:
                     widgets[j].config(bg="blue")
                     print("Miss marked blue")
+    # marking the tiles of the sunken boats with black
+    for i in range(len(tiles_of_sunken_boats[int(other_player)-1])):
+        for j in range(len(widgets)):
+            if tiles_of_sunken_boats[int(other_player)-1][i] == [widgets[j].grid_info()["row"], widgets[j].grid_info()["column"]]:
+                widgets[j].config(bg="black")
+                print("Sunken boat marked black")
 
     # checking if the player has hit a boat of the other player
     for i in range(len(possitions_of_boats[int(other_player)-1])):
@@ -101,11 +110,26 @@ def button_pressed(x, y):
             tiles_hit[int(current_player)-1].append([x, y])
             print(x, y)
             print("added to tiles hit")
-            # logic to remove the hit boat from the list of the boats of the other player once all of its tiles are hit
-            # will be added later...
-            break
-        else:
-            pass
+            # checking if an entire boat has been hit and therefore should be marked as sunken and removed from the game
+            # basically checking if all the boats coordinates are in the tiles_hit list
+          #  for j in range(len(coords_of_boats[int(other_player)-1])):
+         #       if coords_of_boats[int(other_player)-1][j][0] == [x, y]:
+        #            for k in range(len(coords_of_boats[int(other_player)-1][j])-1):
+                    #    if coords_of_boats[int(other_player)-1][j][k] in tiles_hit[int(current_player)-1]:
+                   #         pass
+                  #      else:
+                 #           break
+                #    else:
+               #         for k in range(len(coords_of_boats[int(other_player)-1][j])-1):
+              #              tiles_of_sunken_boats[int(other_player)-1].append(coords_of_boats[int(other_player)-1][j][k])
+             #           number_of_players_boats[int(other_player)-1] -= 1
+            #            print("Boat sunken")
+           #             print(number_of_players_boats)
+          #              break
+
+         #   break
+        #else:
+        #    pass
     which_tiles_tried[int(current_player)-1].append([x, y])
     print(answer + " answer is this" )
     window.update()
@@ -125,7 +149,9 @@ def button_pressed(x, y):
 
 # function to select a boat type from the boat selection
 def select_boat(boat_type):
+    global boat_select
     boat_selected = boat_type
+    boat_select = boat_selected
     print(boat_selected)
     # finding the index of the selected boat
     for i in range(len(boat_types)):
@@ -179,18 +205,9 @@ def is_straight(possitions):
 
 # function to place the boats on the game board
 def place_boat(x, y):
-    global boats_placed, current_player, boat_sizes, number_of_tiles_selected, buttons, boat_size, possitions_of_boats_temp
+    global boats_placed, current_player, boat_sizes, number_of_tiles_selected, buttons, boat_size, possitions_of_boats_temp, coords_of_boats, boat_select
     is_empty = True
     boat_size = 0
-
-    # checking if all the boats are placed, if so the function will return None
-    if boats_placed == len(boat_types):
-        #print(boats_placed, len(boat_types))
-        possitions_of_boats_temp.clear()
-        #print("temp cleared")
-        number_of_tiles_selected = 0
-        #print("All boats placed")
-        return None
     
     # finding the size of the selected boat, this will be used to check if the entire boat has been placed
     for i in range(len(boat_types)):
@@ -220,6 +237,11 @@ def place_boat(x, y):
                 if number_of_tiles_selected == boat_size and tile_next_to_each_other(possitions_of_boats_temp):
                     boats_placed += 1
                     print("Boat placed")
+                    #getting the coordinates of the boats stored in groups based on the size of the boat 
+                    coords_of_boats[int(current_player)-1].append([])
+                    for i in range(len(possitions_of_boats_temp)):
+                        coords_of_boats[int(current_player)-1][boats_placed-1].append(possitions_of_boats_temp[i])
+                    coords_of_boats[int(current_player)-1][boats_placed-1].append(boat_select)
                     # dissabling the boat select button and changing the relief of the selected button and making it red
                     for i in range(len(boat_types)):
                         if boat_button[i].config("relief")[-1] == "sunken":
@@ -239,13 +261,28 @@ def place_boat(x, y):
         # add the possitions of the boats to the actual list of the possitions of the boats(this is done because the positions are first checked if they are next to each other)    
         for i in range(len(possitions_of_boats_temp)):
             possitions_of_boats[int(current_player)-1].append(possitions_of_boats_temp[i])
-      
+            #print(possitions_of_boats_temp[i])
+        # getting the coordinates of the boats in groups
+        #for i in range(0, len(possitions_of_boats_temp), 2):
+            #coords_of_boats[int(current_player)-1].append(possitions_of_boats_temp[i:i+2])
+
+        #print(possitions_of_boats_temp)
+        #print(coords_of_boats)
+            # checking if all the boats are placed, if so the function will return None
+        if boats_placed == len(boat_types)-1:
+            #print(boats_placed, len(boat_types))
+            possitions_of_boats_temp.clear()
+            #print("temp cleared")
+            number_of_tiles_selected = 0
+            #print("All boats placed")
+            return None
         possitions_of_boats_temp.clear()
         #print("temp cleared")
         number_of_tiles_selected = 0
 
 # function to remove the tiles from the game board
 def remove_tiles():
+    #print(coords_of_boats)
     for widget in frame.winfo_children():
         widget.destroy()
 
@@ -258,6 +295,7 @@ def ready_button_change():
 def hold_screen():
     temp2 = True
     global button_pressed_temp
+    print(coords_of_boats)
     # creating the bottom button and text informing the player to press the button if he is ready
     ready_button = tkinter.Button(button_frame, text="Ready", width=9, height=2, command=lambda: ready_button_change())
     ready_button.grid(row=0, column=2)
@@ -321,20 +359,24 @@ number_of_boats = 5
 boats_placed = 0
 number_of_tiles_selected = 0
 boat_types = ["Carrier", "Battleship", "Cruiser", "Submarine", "Destroyer"]
+boat_select = ""
 boat_sizes = [5, 4, 3, 3, 2]
 players = ["1", "2"]
 current_player = random.choice(players)
 possitions_of_boats = []
+coords_of_boats = []
 possitions_of_boats_temp = []
 which_tiles_tried = []
 tiles_hit = []
+tiles_of_sunken_boats = []
 number_of_players_boats = [[number_of_boats],[number_of_boats]]
 for i in range(num_of_players):
     tiles_hit.append([])
-for i in range(num_of_players):
     which_tiles_tried.append([])
-for i in range(num_of_players):
     possitions_of_boats.append([])
+    coords_of_boats.append([])
+    tiles_of_sunken_boats.append([])
+
 buttons = []
 for i in range(num_of_players):
     buttons.append([])
@@ -386,6 +428,7 @@ for widget in boat_frame.winfo_children():
 # second faze of the game, the actual game, 
 # players will take turns to guess the possition of the boats of the other player
 # the player that guesses all of the boats/tiles of the boats of the other player wins
+#print(str(coords_of_boats) + "coords of boats before")
 for i in range(map_size):
     for j in range(map_size):
         buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=10, height=5, command=lambda i=i, j=j: button_pressed(i, j))
