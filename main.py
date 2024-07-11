@@ -54,7 +54,8 @@ def check_win():
 
 # function that is called when a button is pressed, basically it handles the guess of a player
 def button_pressed(x, y):
-    global current_player, number_of_players_boats, buttons, players, possitions_of_boats
+    global current_player, number_of_players_boats, buttons, players, possitions_of_boats, which_tiles_tried
+    widgets = 0
     # creating a variable to hold the answer
     answer = "Miss"
     # creating a variable to hold the other player
@@ -63,28 +64,29 @@ def button_pressed(x, y):
         other_player = players[1]
     else:
         other_player = players[0]
-    print(possitions_of_boats[int(current_player)-1])
-    print(possitions_of_boats[int(other_player)-1])
-    print(x, y)
-    print("second faze function called")
-    print(current_player)
-    print(other_player)
+    
+    # counting the number of buttons on the screen, purely for debugging purposes
+    #for widget in frame.winfo_children():
+    #    widgets += 1
+    #print(widgets)
+
+    # marking the tiles that the current player has tried in previous turns with a different color
+    for i in range(len(which_tiles_tried[int(current_player)-1])):
+        print(which_tiles_tried[int(current_player)-1][i])
+        #print(buttons[int(current_player)-1][which_tiles_tried[int(current_player)-1][i][0]][which_tiles_tried[int(current_player)-1][i][1]])
+        #print(buttons[int(current_player)-1][0][0])
+        print(len(buttons[int(current_player)-1]))
+        print(len(buttons[int(current_player)-1][0]))
+        print(len(buttons))
+        buttons[int(current_player)-1][0][0].config(bg="blue")
     # checking if the player has hit a boat of the other player
     for i in range(len(possitions_of_boats[int(other_player)-1])):
         if possitions_of_boats[int(other_player)-1][i] == [x, y]:
-            #buttons[int(current_player)-1][x][y].config(bg="red")
-            #number_of_players_boats[int(other_player)-1] -= 1
-            print(possitions_of_boats[int(other_player)-1])
-            print(current_player)
-            print(x, y)
-            print("Hit")
             answer = "Hit"
             break
         else:
-            #buttons[int(current_player)-1][x][y].config(bg="blue")
-            print(possitions_of_boats[int(other_player)-1][i])
-            print(x, y)
-            print("Miss")
+            pass
+    which_tiles_tried[int(current_player)-1].append([x, y])
     print(answer + " answer is this" )
     window.update()
 
@@ -160,6 +162,16 @@ def place_boat(x, y):
     global boats_placed, current_player, boat_sizes, number_of_tiles_selected, buttons, boat_size, possitions_of_boats_temp
     is_empty = True
     boat_size = 0
+
+    # checking if all the boats are placed, if so the function will return None
+    if boats_placed == len(boat_types):
+        #print(boats_placed, len(boat_types))
+        possitions_of_boats_temp.clear()
+        #print("temp cleared")
+        number_of_tiles_selected = 0
+        #print("All boats placed")
+        return None
+    
     # finding the size of the selected boat, this will be used to check if the entire boat has been placed
     for i in range(len(boat_types)):
         if boat_button[i].config("relief")[-1] == "sunken":
@@ -171,7 +183,6 @@ def place_boat(x, y):
         return None
     else:
         while number_of_tiles_selected != boat_size:
-            #print(boat_size, number_of_tiles_selected)
             # checking if the boat is already placed on the selected tile
             for i in range(len(possitions_of_boats[int(current_player)-1])):
                 if possitions_of_boats[int(current_player)-1][i] == [x, y]:
@@ -195,30 +206,22 @@ def place_boat(x, y):
                             boat_button[i].config(relief="raised")
                             boat_button[i].config(state="disabled")
                             boat_button[i].config(bg="red")
-                    print("Boat placed")
                     break
                 if tile_next_to_each_other(possitions_of_boats_temp) == False:
                     print("Tiles are not next to each other")
                     buttons[int(current_player)-1][x][y].config(bg="white")
                     print(possitions_of_boats_temp)
                     possitions_of_boats_temp.clear()
-                    print("temp cleared")
+                    #print("temp cleared")
                     break
             window.update()
 
         # add the possitions of the boats to the actual list of the possitions of the boats(this is done because the positions are first checked if they are next to each other)    
         for i in range(len(possitions_of_boats_temp)):
             possitions_of_boats[int(current_player)-1].append(possitions_of_boats_temp[i])
-        # end this function if the boats are all placed
-        if boats_placed == len(boat_types):
-            print(boats_placed, len(boat_types))
-            possitions_of_boats_temp.clear()
-            print("temp cleared")
-            number_of_tiles_selected = 0
-            return None
-            
+      
         possitions_of_boats_temp.clear()
-        print("temp cleared")
+        #print("temp cleared")
         number_of_tiles_selected = 0
 
 # function to remove the tiles from the game board
@@ -303,7 +306,10 @@ players = ["1", "2"]
 current_player = random.choice(players)
 possitions_of_boats = []
 possitions_of_boats_temp = []
+which_tiles_tried = []
 number_of_players_boats = [[number_of_boats],[number_of_boats]]
+for i in range(num_of_players):
+    which_tiles_tried.append([])
 for i in range(num_of_players):
     possitions_of_boats.append([])
 buttons = []
