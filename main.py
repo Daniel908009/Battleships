@@ -51,11 +51,36 @@ def check_win():
     for i in range(num_of_players):
         if number_of_players_boats[i] == 0:
             return True
+        
+# function to mark the tiles that the player has already tried
+#def marking_tiles():
+ #   global which_tiles_tried, buttons, current_player
+  #  widgets = []
+   # while True:
+    #    player = current_player
+     #   for widget in frame.winfo_children():
+     #       widgets.append(widget)
+    # checking if the current player has already tried the tile
+     #   for i in range(len(which_tiles_tried[int(player)-1])):
+      #      for j in range(len(widgets)):
+       #         if which_tiles_tried[int(player)-1][i] == [widgets[j].grid_info()["row"], widgets[j].grid_info()["column"]]:
+        #            widgets[j].config(bg="red")
+       # window.update()
+    # if the current player has changed, the function will repeat, so that the new player can mark the tiles he has already tried
+       # if player != current_player:
+        #    widgets.clear()
+            # resetting the buttons to original color
+         #   for widget in frame.winfo_children():
+          #      widget.config(bg="SystemButtonFace")
+           # print("Player changed, widgets cleared, buttons reset")
+        #else:
+         #   pass
+        
 
 # function that is called when a button is pressed, basically it handles the guess of a player
 def button_pressed(x, y):
     global current_player, number_of_players_boats, buttons, players, possitions_of_boats, which_tiles_tried
-    widgets = 0
+    widgets = []
     # creating a variable to hold the answer
     answer = "Miss"
     # creating a variable to hold the other player
@@ -64,21 +89,18 @@ def button_pressed(x, y):
         other_player = players[1]
     else:
         other_player = players[0]
+    widgets.clear()
+    # getting all the widgets in the frame and adding them to the widgets list
+    for widget in frame.winfo_children():
+        widgets += [widget]
+        widget.configure(bg="SystemButtonFace")
     
-    # counting the number of buttons on the screen, purely for debugging purposes
-    #for widget in frame.winfo_children():
-    #    widgets += 1
-    #print(widgets)
-
-    # marking the tiles that the current player has tried in previous turns with a different color
+    # marking the tiles that the player has already tried in previous turns
     for i in range(len(which_tiles_tried[int(current_player)-1])):
-        print(which_tiles_tried[int(current_player)-1][i])
-        #print(buttons[int(current_player)-1][which_tiles_tried[int(current_player)-1][i][0]][which_tiles_tried[int(current_player)-1][i][1]])
-        #print(buttons[int(current_player)-1][0][0])
-        print(len(buttons[int(current_player)-1]))
-        print(len(buttons[int(current_player)-1][0]))
-        print(len(buttons))
-        buttons[int(current_player)-1][0][0].config(bg="blue")
+        for j in range(len(widgets)):
+            if which_tiles_tried[int(current_player)-1][i] == [widgets[j].grid_info()["row"], widgets[j].grid_info()["column"]]:
+                widgets[j].config(bg="red")
+
     # checking if the player has hit a boat of the other player
     for i in range(len(possitions_of_boats[int(other_player)-1])):
         if possitions_of_boats[int(other_player)-1][i] == [x, y]:
@@ -367,6 +389,8 @@ for i in range(map_size):
     for j in range(map_size):
         buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=10, height=5, command=lambda i=i, j=j: button_pressed(i, j))
         buttons[int(current_player)-1][i][j].grid(row=i, column=j)
+        #thread1 = threading.Thread(target=marking_tiles)
+        #thread1.start()
     window.update()
     if current_player == players[0]:
         current_player = players[1]
