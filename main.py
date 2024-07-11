@@ -50,36 +50,11 @@ def check_win():
     global number_of_players_boats
     for i in range(num_of_players):
         if number_of_players_boats[i] == 0:
-            return True
-        
-# function to mark the tiles that the player has already tried
-#def marking_tiles():
- #   global which_tiles_tried, buttons, current_player
-  #  widgets = []
-   # while True:
-    #    player = current_player
-     #   for widget in frame.winfo_children():
-     #       widgets.append(widget)
-    # checking if the current player has already tried the tile
-     #   for i in range(len(which_tiles_tried[int(player)-1])):
-      #      for j in range(len(widgets)):
-       #         if which_tiles_tried[int(player)-1][i] == [widgets[j].grid_info()["row"], widgets[j].grid_info()["column"]]:
-        #            widgets[j].config(bg="red")
-       # window.update()
-    # if the current player has changed, the function will repeat, so that the new player can mark the tiles he has already tried
-       # if player != current_player:
-        #    widgets.clear()
-            # resetting the buttons to original color
-         #   for widget in frame.winfo_children():
-          #      widget.config(bg="SystemButtonFace")
-           # print("Player changed, widgets cleared, buttons reset")
-        #else:
-         #   pass
-        
+            return True   
 
 # function that is called when a button is pressed, basically it handles the guess of a player
 def button_pressed(x, y):
-    global current_player, number_of_players_boats, buttons, players, possitions_of_boats, which_tiles_tried
+    global current_player, number_of_players_boats, buttons, players, possitions_of_boats, which_tiles_tried, tiles_hit
     widgets = []
     # creating a variable to hold the answer
     answer = "Miss"
@@ -89,22 +64,45 @@ def button_pressed(x, y):
         other_player = players[1]
     else:
         other_player = players[0]
+
+    # clearing the widgets list before filling it with the widgets in the frame again
     widgets.clear()
     # getting all the widgets in the frame and adding them to the widgets list
     for widget in frame.winfo_children():
         widgets += [widget]
         widget.configure(bg="SystemButtonFace")
-    
-    # marking the tiles that the player has already tried in previous turns
-    for i in range(len(which_tiles_tried[int(current_player)-1])):
+        widget.configure(text=" ")
+
+    # all the tiles hit by the player that had a ship in them will be marked with an X
+    for i in range(len(tiles_hit[int(other_player)-1])):
         for j in range(len(widgets)):
-            if which_tiles_tried[int(current_player)-1][i] == [widgets[j].grid_info()["row"], widgets[j].grid_info()["column"]]:
-                widgets[j].config(bg="red")
+            if tiles_hit[int(other_player)-1][i] == [widgets[j].grid_info()["row"], widgets[j].grid_info()["column"]]:
+                widgets[j].config(text="X")
+                print("X added")
+                window.update()
+
+    # marking the tiles that the other player has already tried in previous turns with red
+    for i in range(len(which_tiles_tried[int(other_player)-1])):
+        for j in range(len(widgets)):
+            if which_tiles_tried[int(other_player)-1][i] == [widgets[j].grid_info()["row"], widgets[j].grid_info()["column"]]:
+                # if the tile was a hit, it will be marked with red color, if it was a miss, it will be marked with blue
+                if widgets[j].cget("text") == "X":
+                    widgets[j].config(bg="red")
+                    print("X marked red")
+                else:
+                    widgets[j].config(bg="blue")
+                    print("Miss marked blue")
 
     # checking if the player has hit a boat of the other player
     for i in range(len(possitions_of_boats[int(other_player)-1])):
         if possitions_of_boats[int(other_player)-1][i] == [x, y]:
+            #widgets[x*map_size+y].config(text="X")
             answer = "Hit"
+            tiles_hit[int(current_player)-1].append([x, y])
+            print(x, y)
+            print("added to tiles hit")
+            # logic to remove the hit boat from the list of the boats of the other player once all of its tiles are hit
+            # will be added later...
             break
         else:
             pass
@@ -329,7 +327,10 @@ current_player = random.choice(players)
 possitions_of_boats = []
 possitions_of_boats_temp = []
 which_tiles_tried = []
+tiles_hit = []
 number_of_players_boats = [[number_of_boats],[number_of_boats]]
+for i in range(num_of_players):
+    tiles_hit.append([])
 for i in range(num_of_players):
     which_tiles_tried.append([])
 for i in range(num_of_players):
@@ -389,8 +390,6 @@ for i in range(map_size):
     for j in range(map_size):
         buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=10, height=5, command=lambda i=i, j=j: button_pressed(i, j))
         buttons[int(current_player)-1][i][j].grid(row=i, column=j)
-        #thread1 = threading.Thread(target=marking_tiles)
-        #thread1.start()
     window.update()
     if current_player == players[0]:
         current_player = players[1]
