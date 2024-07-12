@@ -60,8 +60,87 @@ def check_win():
 
 # function to inform the players about the game results 
 def info_win(player, black_tiles, red_tiles, blue_tiles):
-    # coloring the game board based on who won
-    pass
+    # creating a win info window with 4 button frames, two for each player, first window shows their possitions of the boats
+    # the second window shows the guesses the boats by the other player
+    win_info_window = tkinter.Toplevel(window)
+    win_info_window.title("Game results")
+    win_info_window.geometry("800x600")
+    win_info_window.resizable(False, False)
+    win_info_window.iconbitmap("boat.ico")
+    # creating the main label for the win info window
+    win_info_label = tkinter.Label(win_info_window, text="Game results", font=("Arial", 20))
+    win_info_label.pack(side="top")
+    # creating the labels for the different frames
+    top_label = tkinter.Label(win_info_window, text="Player 1 boats X Player 2 boats", font=("Arial", 12))
+    top_label.pack(side="top")
+    # creating a frame for the frames and labels
+    win_info_frame = tkinter.Frame(win_info_window)
+    win_info_frame.pack()
+    # creating the frames for the boat placement of the players
+    player1_frame = tkinter.Frame(win_info_frame)
+    player1_frame.grid(row=0, column=0)
+    player2_frame = tkinter.Frame(win_info_frame)
+    player2_frame.grid(row=0, column=1)
+    # creating the frames for the guesses of the players
+    player1_guesses_frame = tkinter.Frame(win_info_frame)
+    player1_guesses_frame.grid(row=1, column=0)
+    player2_guesses_frame = tkinter.Frame(win_info_frame)
+    player2_guesses_frame.grid(row=1, column=1)
+    #player1_label = tkinter.Label(player1_frame, text="Player 1 boats", font=("Arial", 12))
+    #player1_label.grid(row=0, column=0, columnspan=map_size)
+    #player2_label = tkinter.Label(player2_frame, text="Player 2 boats", font=("Arial", 12))
+    #player2_label.grid(row=0, column=0, columnspan=map_size)
+    #player1_guesses_label = tkinter.Label(player1_guesses_frame, text="Player 1 guesses", font=("Arial", 12))
+    #player1_guesses_label.grid(row=0, column=0, columnspan=map_size)
+    #player2_guesses_label = tkinter.Label(player2_guesses_frame, text="Player 2 guesses", font=("Arial", 12))
+    #player2_guesses_label.grid(row=0, column=0, columnspan=map_size)
+    # creating the buttons for the boat placement of the players
+    for i in range(map_size):
+        for j in range(map_size):
+            player1_button = tkinter.Button(player1_frame, text=" ", width=2, height=1, state="disabled")
+            player1_button.grid(row=i+1, column=j)
+            player2_button = tkinter.Button(player2_frame, text=" ", width=2, height=1, state="disabled")
+            player2_button.grid(row=i+1, column=j)
+    # creating the buttons for the guesses of the players
+    for i in range(map_size):
+        for j in range(map_size):
+            player1_guesses_button = tkinter.Button(player1_guesses_frame, text=" ", width=2, height=1, state="disabled")
+            player1_guesses_button.grid(row=i+1, column=j)
+            player2_guesses_button = tkinter.Button(player2_guesses_frame, text=" ", width=2, height=1, state=  "disabled")
+            player2_guesses_button.grid(row=i+1, column=j)
+    # changing the color of the buttons based on the lists coords_of_boats, the tiles that are in that list will be marked with green
+    for i in range(len(coords_of_boats[0])):
+        for j in range(len(coords_of_boats[0][i])-1):
+            player1_frame.winfo_children()[coords_of_boats[0][i][j][0]*map_size+coords_of_boats[0][i][j][1]].config(bg="green")
+    # the same goes for the second player
+    for i in range(len(coords_of_boats[1])):
+        for j in range(len(coords_of_boats[1][i])-1):
+            player2_frame.winfo_children()[coords_of_boats[1][i][j][0]*map_size+coords_of_boats[1][i][j][1]].config(bg="green")
+
+    # coloring the buttons based on the lists of the guesses of the players, tiles_hit will be marked with red, which_tiles_tried with blue and the sunken boats with black
+    # blue missed first
+    for i in range(len(which_tiles_tried[0])):
+        player1_guesses_frame.winfo_children()[which_tiles_tried[0][i][0]*map_size+which_tiles_tried[0][i][1]].config(bg="blue")
+    for i in range(len(which_tiles_tried[1])):
+        player2_guesses_frame.winfo_children()[which_tiles_tried[1][i][0]*map_size+which_tiles_tried[1][i][1]].config(bg="blue")
+    # red hits second
+    for i in range(len(tiles_hit[0])):
+        player1_guesses_frame.winfo_children()[tiles_hit[0][i][0]*map_size+tiles_hit[0][i][1]].config(bg="red")
+    for i in range(len(tiles_hit[1])):
+        player2_guesses_frame.winfo_children()[tiles_hit[1][i][0]*map_size+tiles_hit[1][i][1]].config(bg="red")
+    # black sunken boats last
+    for i in range(len(tiles_of_sunken_boats[0])):
+        player1_guesses_frame.winfo_children()[tiles_of_sunken_boats[0][i][0]*map_size+tiles_of_sunken_boats[0][i][1]].config(bg="black")
+    for i in range(len(tiles_of_sunken_boats[1])):
+        player2_guesses_frame.winfo_children()[tiles_of_sunken_boats[1][i][0]*map_size+tiles_of_sunken_boats[1][i][1]].config(bg="black")
+        
+    # creating a bottom label for the win info window
+    bottom_label = tkinter.Label(win_info_window, text="Player 1 guesses X Player 2 guesses", font=("Arial", 12))
+    bottom_label.pack()
+    
+    # creating the bottom button for the win info window
+    close_button = tkinter.Button(win_info_window, text="Close", width=9, height=2, command=lambda: win_info_window.destroy())
+    close_button.pack(side="bottom")
     
 # function that is called when a button is pressed, basically it handles the guess of a player
 def button_pressed(x, y):
@@ -170,7 +249,7 @@ def button_pressed(x, y):
         for widget in frame.winfo_children():
             widget.config(state="disabled")
         # calling the info_win function to inform the players about the game result
-        info_win(current_player)
+        info_win(current_player, tiles_of_sunken_boats, tiles_hit, which_tiles_tried)
         #button_pressed(x, y)
         return None
     else:
@@ -331,9 +410,9 @@ def hold_screen():
     global button_pressed_temp
     # creating the bottom button and text informing the player to press the button if he is ready
     ready_button = tkinter.Button(button_frame, text="Ready", width=9, height=2, command=lambda: ready_button_change())
-    ready_button.grid(row=0, column=2)
+    ready_button.grid(row=0, column=3)
     ready_label = tkinter.Label(button_frame, text="Press the ready button once you switched places with your oponent", font=("Arial", 12))
-    ready_label.grid(row=0, column=3)
+    ready_label.grid(row=0, column=4)
     while temp2:
         if button_pressed_temp:
             ready_button.grid_remove()
@@ -442,11 +521,12 @@ button_frame = tkinter.Frame(window)
 button_frame.pack(side="bottom")
 
 # creating the reset button and settings button
-reset_button = tkinter.Button(button_frame, text="Reset",width=9, height=2 ,command=lambda: reset())
+reset_button = tkinter.Button(button_frame, text="Reset",width=10, height=2 ,command=lambda: reset())
 reset_button.grid(row=0, column=0)
-settings_button = tkinter.Button(button_frame, text="Settings", width=9, height=2, command=lambda: settings())
+settings_button = tkinter.Button(button_frame, text="Settings", width=10, height=2, command=lambda: settings())
 settings_button.grid(row=0, column=1)
-
+remove_ships_button = tkinter.Button(button_frame, text="Remove ships", width=10, height=2)
+remove_ships_button.grid(row=0, column=2)
 
 # first faze of the game, the placement of the boats
 for i in range(num_of_players):
@@ -457,6 +537,8 @@ for i in range(num_of_players):
 # half fazes of the game, deleting the buttons of the boat selection
 for widget in boat_frame.winfo_children():
     widget.destroy()
+
+remove_ships_button.grid_remove()
 
 # second faze of the game, the actual game, 
 # players will take turns to guess the possition of the boats of the other player
