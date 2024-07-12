@@ -5,6 +5,14 @@ import time
 
 # function to start a new game
 def new_game():
+    # filling the buttons list based on the new map size
+    global buttons
+    for i in range(num_of_players):
+        buttons.append([])
+        for j in range(map_size):
+            buttons[i].append([])
+            for k in range(map_size):
+                buttons[i][j].append([])
     # creating the reset button and settings button
     reset_button = tkinter.Button(button_frame, text="Reset",width=button_width, height=button_height ,command=lambda: reset())
     reset_button.grid(row=0, column=0)
@@ -43,23 +51,18 @@ def reset():
     # readjust the bottom buttons
     button_width = int(window.winfo_height() // map_size /10)
     button_height = int(button_width // 5)
-    #for widget in button_frame.winfo_children():
-     #   widget.configure(width=button_width, height=button_height)
     # readjust the main label
-    main_label_size = int(window.winfo_height() // 20)
-    #main_label.configure(font=("Arial", main_label_size))
+    main_label_size = int(window.winfo_height() // 20-2)
     # readjust the board button size
     board_button_width = int(window.winfo_height() // map_size /11)
     board_button_height = int(board_button_width // 2)
-    #for widget in frame.winfo_children():
-     #   widget.configure(width=board_button_width, height=board_button_height)
     # readjust the boat selection buttons
     select_width = int(window.winfo_height() // number_of_boats / 11)
     select_height = int(select_width // 5)
-    #for widget in boat_frame.winfo_children():
-     #   widget.configure(width=select_width, height=select_height)
+    # readjust the labels based on new information
+    main_label.config(font=("Arial", main_label_size))
+    info_label_main.config(font=("Arial", main_label_size-5), text="Info")
         # READJUSTING THE GAME
-    #print(map_size)
     # deleting all the different widgets in the windows and frames
     for widget in frame.winfo_children():
         widget.destroy()
@@ -69,7 +72,7 @@ def reset():
         widget.destroy()
     
     # clearing the lists and variables and resetting them to their default values
-    global boats_placed, current_player, possitions_of_boats, coords_of_boats, possitions_of_boats_temp, which_tiles_tried, tiles_hit, tiles_of_sunken_boats, number_of_players_boats
+    global boats_placed, current_player, possitions_of_boats, coords_of_boats, possitions_of_boats_temp, which_tiles_tried, tiles_hit, tiles_of_sunken_boats, number_of_players_boats, buttons
     # clearing the variables and lists
     possitions_of_boats.clear()
     coords_of_boats.clear()
@@ -78,6 +81,7 @@ def reset():
     tiles_hit.clear()
     tiles_of_sunken_boats.clear()
     number_of_players_boats.clear()
+    buttons.clear()
     # setting to default values
     boats_placed = 0
     current_player = random.choice(players)
@@ -99,6 +103,10 @@ def reset():
 
 # function that applies the settings that the player has chosen
 def apply_settings(size_entry, resizable):
+    # checking if the size of the map is in the correct range
+    if int(size_entry) > 10 or int(size_entry) < 5:
+        info_label_main.config(text="Map size must be between 5 and 10!")
+        return None
     # if player checked the resizable checkbutton, the window will now be resizable
     if resizable:
         window.resizable(True, True)
@@ -132,6 +140,9 @@ def settings():
     map_size_label.grid(row=0, column=0)
     map_size_entry = tkinter.Entry(settings_frame, width=10, textvariable=e1)
     map_size_entry.grid(row=0, column=1)
+    # creating a label informing the player about the max value and the min value of the map size
+    map_size_info_label = tkinter.Label(settings_frame, text="Max: 10, Min: 5", font=("Arial", 10))
+    map_size_info_label.grid(row=0, column=2)
     # creating a checkbutton, that can be selected when player wants to have a resizable window
     resizable = tkinter.BooleanVar()
     if window.resizable():
@@ -331,7 +342,8 @@ def button_pressed(x, y):
                             
                 pass
     which_tiles_tried[int(current_player)-1].append([x, y])
-    print(answer + " answer is this" )
+    #print(answer + " answer is this" )
+    info_label_main.config(text=answer)
     window.update()
 
     # checking if the player has won
@@ -342,6 +354,7 @@ def button_pressed(x, y):
         for widget in frame.winfo_children():
             widget.config(state="disabled")
         # calling the info_win function to inform the players about the game result
+        info_label_main.config(text="Player " + current_player + " wins")
         info_win()
         return None
     else:
@@ -367,6 +380,7 @@ def select_boat(boat_type):
     for i in range(len(boat_types)):
         if i != boat_index:
             boat_button[i].config(relief="raised")
+    info_label_main.config(text="Boat selected" + " " + boat_selected)
 
 # function to check if the tiles selected for the boat are next to each other
 def tile_next_to_each_other(possitions):
@@ -387,23 +401,24 @@ def tile_next_to_each_other(possitions):
             break
     return temp
 
-# function to check if all the tiles form a straight line(horizontal or vertical)
+# function to check if entered tiles are in a straight line(horizontal or vertical) if yes then everything is fine
+# if not then the player will be informed that the boat is not straight and the tiles that have been selected for that boat will be cleared and removed from the lists
 def is_straight(possitions):
     temp = True
-    main_tile = possitions[0]
-    # checking if the tiles are in a straight line with the first tile being the main tile
-    for i in range(1, len(possitions)):
-        if possitions[i][0] == main_tile[0] and possitions[i][1] == main_tile[1] + 1:
-            temp = True
-        elif possitions[i][0] == main_tile[0] and possitions[i][1] == main_tile[1] - 1:
-            temp = True
-        elif possitions[i][0] == main_tile[0] + 1 and possitions[i][1] == main_tile[1]:
-            temp = True
-        elif possitions[i][0] == main_tile[0] - 1 and possitions[i][1] == main_tile[1]:
-            temp = True
+    # checking if the tiles are in a straight line
+    if len(possitions) > 1:
+        if possitions[0][0] == possitions[1][0]:
+            for i in range(len(possitions)-1):
+                if possitions[i][0] != possitions[i+1][0]:
+                    temp = False
+                    break
+        elif possitions[0][1] == possitions[1][1]:
+            for i in range(len(possitions)-1):
+                if possitions[i][1] != possitions[i+1][1]:
+                    temp = False
+                    break
         else:
             temp = False
-            break
     return temp
 
 # function to place the boats on the game board
@@ -411,6 +426,7 @@ def place_boat(x, y):
     global boats_placed, current_player, boat_sizes, number_of_tiles_selected, buttons, boat_size, possitions_of_boats_temp, coords_of_boats, boat_select
     is_empty = True
     boat_size = 0
+    problem_found = False
     
     # finding the size of the selected boat, this will be used to check if the entire boat has been placed
     for i in range(len(boat_types)):
@@ -419,7 +435,8 @@ def place_boat(x, y):
 
  # if no boat is selected, the player will be informed and the function will return None
     if boat_size == 0:
-        print("No boat selected")
+        #print("No boat selected")
+        info_label_main.config(text="No boat selected")
         return None
     else:
         while number_of_tiles_selected != boat_size:
@@ -431,14 +448,16 @@ def place_boat(x, y):
                 if possitions_of_boats_temp[i] == [x, y]:
                     is_empty = False
             if is_empty == False:
-                #print("Boat already placed here") eventually add a label that will inform the player that the boat is already placed here
+                #info_label_main.config(text="Boat already placed on this tile")
                 is_empty = True
             else:
+                print(possitions_of_boats_temp)
                 number_of_tiles_selected += 1
                 possitions_of_boats_temp.append([x, y])
                 buttons[int(current_player)-1][x][y].config(bg="green")
-                if number_of_tiles_selected == boat_size and tile_next_to_each_other(possitions_of_boats_temp):
+                if number_of_tiles_selected == boat_size and tile_next_to_each_other(possitions_of_boats_temp) and is_straight(possitions_of_boats_temp):
                     boats_placed += 1
+                    info_label_main.config(text="Boat placed")
                     #getting the coordinates of the boats stored in groups based on the size of the boat 
                     coords_of_boats[int(current_player)-1].append([])
                     for i in range(len(possitions_of_boats_temp)):
@@ -451,9 +470,24 @@ def place_boat(x, y):
                             boat_button[i].config(state="disabled")
                             boat_button[i].config(bg="red")
                     break
+                if number_of_tiles_selected > 2 and is_straight(possitions_of_boats_temp) == False:
+                    #reseting the tiles that have been selected for the boat and clearing the list of the selected tiles
+                    for i in range(number_of_tiles_selected):
+                        buttons[int(current_player)-1][possitions_of_boats_temp[i][0]][possitions_of_boats_temp[i][1]].config(bg="SystemButtonFace")
+                        #possitions_of_boats_temp.pop()
+                        #window.update()
+                        #time.sleep(1)
+                        #print(possitions_of_boats_temp)
+                        #print("runned")
+                    info_label_main.config(text="Boat is not straight")
+                    #print(possitions_of_boats_temp)
+                    possitions_of_boats_temp.clear()
+                    problem_found = True
+                    break
                 if tile_next_to_each_other(possitions_of_boats_temp) == False:
-                    print("Tiles are not next to each other")
-                    buttons[int(current_player)-1][x][y].config(bg="white")
+                    #print("Tiles are not next to each other")
+                    info_label_main.config(text="Tiles are not next to each other")
+                    buttons[int(current_player)-1][x][y].config(bg="SystemButtonFace")
                     possitions_of_boats_temp.clear()
                     break
             window.update()
@@ -461,13 +495,22 @@ def place_boat(x, y):
         # add the possitions of the boats to the actual list of the possitions of the boats(this is done because the positions are first checked if they are next to each other)    
         for i in range(len(possitions_of_boats_temp)):
             possitions_of_boats[int(current_player)-1].append(possitions_of_boats_temp[i])
-            # checking if all the boats are placed, if so the function will return None
+            if problem_found:
+                # a certain amount of values will have to be removed from the possitions_of_boats list, based on the amount of tiles selected for the boat
+                #print(number_of_tiles_selected)
+                #print(possitions_of_boats)
+                for i in range(number_of_tiles_selected):
+                    possitions_of_boats[int(current_player)-1].pop()
+            #print(possitions_of_boats)
+        # checking if all the boats are placed, if so the function will return None
         if boats_placed == len(boat_types)-1:
             possitions_of_boats_temp.clear()
             number_of_tiles_selected = 0
             return None
         possitions_of_boats_temp.clear()
         number_of_tiles_selected = 0
+        problem_found = False
+        #print("rest of the code runned")
 
 # function to remove the tiles from the game board
 def remove_tiles():
@@ -584,7 +627,7 @@ button_width = int(window.winfo_height() // map_size /10)
 button_height = int(button_width // 5)
 #print(button_width, button_height)
 # setting the label size based on the window size
-main_label_size = int(window.winfo_height() // 20)
+main_label_size = int(window.winfo_height() // 20-2)
 # setting the board button height and width based on the window size and the map size
 board_button_width = int(window.winfo_height() // map_size /11)
 board_button_height = int(board_button_width // 2)
@@ -597,6 +640,10 @@ select_height = int(select_width // 5)
 # creating a top label for the game, displaying the current player
 main_label = tkinter.Label(window, text="Player " + current_player + "'s turn", font=("Arial", main_label_size))
 main_label.pack(side="top")
+
+# creating an info label for the game(this label shows if player has hit a boat or not, or if there is a problem with the placement of the boats, etc.)
+info_label_main = tkinter.Label(window, text="Info", font=("Arial", main_label_size-5))
+info_label_main.pack(side="top")
 
 # creating the game board
 frame = tkinter.Frame(window)
