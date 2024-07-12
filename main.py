@@ -3,10 +3,113 @@ import tkinter
 import random
 import time
 
+# function to start a new game
+def new_game():
+    # creating the reset button and settings button
+    reset_button = tkinter.Button(button_frame, text="Reset",width=button_width, height=button_height ,command=lambda: reset())
+    reset_button.grid(row=0, column=0)
+    settings_button = tkinter.Button(button_frame, text="Settings", width=button_width, height=button_height, command=lambda: settings())
+    settings_button.grid(row=0, column=1)
+
+    # first faze of the game, the placement of the boats
+    for i in range(num_of_players):
+        current_player = players[i]
+        choose_faze()
+        remove_tiles()
+        hold_screen()
+
+    # half fazes of the game, deleting the buttons of the boat selection
+    for widget in boat_frame.winfo_children():
+        widget.destroy()
+
+    # second faze of the game, the actual game, 
+    # players will take turns to guess the possition of the boats of the other player
+    # the player that guesses all of the boats/tiles of the boats of the other player wins
+    for i in range(map_size):
+        for j in range(map_size):
+            buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=board_button_width, height=board_button_height, command=lambda i=i, j=j: button_pressed(i, j))
+            buttons[int(current_player)-1][i][j].grid(row=i, column=j)
+        window.update()
+        if current_player == players[0]:
+            current_player = players[1]
+        else:
+            current_player = players[0]
+
+
 # function to reset the game
 def reset():
-    pass
+    global board_button_height,board_button_width, button_height, button_width, select_height, select_width, main_label_size
+        # READJUSTING THE BUTTONS AND LABELS
+    # readjust the bottom buttons
+    button_width = int(window.winfo_height() // map_size /10)
+    button_height = int(button_width // 5)
+    #for widget in button_frame.winfo_children():
+     #   widget.configure(width=button_width, height=button_height)
+    # readjust the main label
+    main_label_size = int(window.winfo_height() // 20)
+    #main_label.configure(font=("Arial", main_label_size))
+    # readjust the board button size
+    board_button_width = int(window.winfo_height() // map_size /11)
+    board_button_height = int(board_button_width // 2)
+    #for widget in frame.winfo_children():
+     #   widget.configure(width=board_button_width, height=board_button_height)
+    # readjust the boat selection buttons
+    select_width = int(window.winfo_height() // number_of_boats / 11)
+    select_height = int(select_width // 5)
+    #for widget in boat_frame.winfo_children():
+     #   widget.configure(width=select_width, height=select_height)
+        # READJUSTING THE GAME
+    #print(map_size)
+    # deleting all the different widgets in the windows and frames
+    for widget in frame.winfo_children():
+        widget.destroy()
+    for widget in boat_frame.winfo_children():
+        widget.destroy()
+    for widget in button_frame.winfo_children():
+        widget.destroy()
+    
+    # clearing the lists and variables and resetting them to their default values
+    global boats_placed, current_player, possitions_of_boats, coords_of_boats, possitions_of_boats_temp, which_tiles_tried, tiles_hit, tiles_of_sunken_boats, number_of_players_boats
+    # clearing the variables and lists
+    possitions_of_boats.clear()
+    coords_of_boats.clear()
+    possitions_of_boats_temp.clear()
+    which_tiles_tried.clear()
+    tiles_hit.clear()
+    tiles_of_sunken_boats.clear()
+    number_of_players_boats.clear()
+    # setting to default values
+    boats_placed = 0
+    current_player = random.choice(players)
+    possitions_of_boats = []
+    coords_of_boats = []
+    possitions_of_boats_temp = []
+    which_tiles_tried = []
+    tiles_hit = []
+    tiles_of_sunken_boats = []
+    number_of_players_boats = [[number_of_boats],[number_of_boats]]
+    for i in range(num_of_players):
+        tiles_hit.append([])
+        which_tiles_tried.append([])
+        possitions_of_boats.append([])
+        coords_of_boats.append([])
+        tiles_of_sunken_boats.append([])
+    # starting a new game, this time with the new settings applied
+    new_game()
 
+# function that applies the settings that the player has chosen
+def apply_settings(size_entry, resizable):
+    # if player checked the resizable checkbutton, the window will now be resizable
+    if resizable:
+        window.resizable(True, True)
+    else:
+        window.resizable(False, False)
+    # changing the map size based on the entry of the player
+    global map_size
+    map_size = int(size_entry)
+    # resetting the game so the changes can take effect
+    reset()
+    
 # function to open settings window
 def settings():
     global map_size, number_of_boats
@@ -29,16 +132,20 @@ def settings():
     map_size_label.grid(row=0, column=0)
     map_size_entry = tkinter.Entry(settings_frame, width=10, textvariable=e1)
     map_size_entry.grid(row=0, column=1)
-    # creating a setting for the number of boats
-    e2 = tkinter.StringVar()
-    e2.set(number_of_boats)
-    number_of_boats_label = tkinter.Label(settings_frame, text="Number of boats", font=("Arial", 12))
-    number_of_boats_label.grid(row=1, column=0)
-    number_of_boats_entry = tkinter.Entry(settings_frame, width=10, textvariable=e2)
-    number_of_boats_entry.grid(row=1, column=1)
+    # creating a checkbutton, that can be selected when player wants to have a resizable window
+    resizable = tkinter.BooleanVar()
+    if window.resizable():
+        resizable.set(True)
+    else:
+        resizable.set(False)
+    resizable_checkbutton = tkinter.Checkbutton(settings_frame, variable=resizable)
+    resizable_checkbutton.grid(row=1, column=1)
+    # creating a label for the resizable checkbutton
+    resizable_label = tkinter.Label(settings_frame, text="Resizable window", font=("Arial", 10))
+    resizable_label.grid(row=1, column=0)
 
     # creating the apply button
-    apply_button = tkinter.Button(settings_window, text="Apply", width=9, height=2)
+    apply_button = tkinter.Button(settings_window, text="Apply", width=9, height=2, command=lambda: apply_settings(map_size_entry.get(), resizable.get()))
     apply_button.pack(side="bottom")
 
     settings_window.mainloop()
@@ -144,7 +251,7 @@ def info_win():
     bottom_label.pack()
     
     # creating the bottom button for the win info window
-    close_button = tkinter.Button(win_info_window, text="Close", width=9, height=2, command=lambda: win_info_window.destroy())
+    close_button = tkinter.Button(win_info_window, text="Close", width=button_width, height=button_height, command=lambda: win_info_window.destroy())
     close_button.pack(side="bottom")
     
 # function that is called when a button is pressed, basically it handles the guess of a player
@@ -377,7 +484,7 @@ def hold_screen():
     temp2 = True
     global button_pressed_temp
     # creating the bottom button and text informing the player to press the button if he is ready
-    ready_button = tkinter.Button(button_frame, text="Ready", width=9, height=2, command=lambda: ready_button_change())
+    ready_button = tkinter.Button(button_frame, text="Ready", width=button_width, height=button_height, command=lambda: ready_button_change())
     ready_button.grid(row=0, column=3)
     ready_label = tkinter.Label(button_frame, text="Press the ready button once you switched places with your oponent", font=("Arial", 12))
     ready_label.grid(row=0, column=4)
@@ -400,13 +507,13 @@ def choose_faze():
         boat_button.append([])
     # creating the buttons for the boat selection
     for i in range(number_of_boats):
-        boat_button[i] = tkinter.Button(boat_frame, text=boat_types[i] + " (" + str(boat_sizes[i]) + ")", width=10, height=2, command=lambda i=i: select_boat(boat_types[i]))
+        boat_button[i] = tkinter.Button(boat_frame, text=boat_types[i] + " (" + str(boat_sizes[i]) + ")", width=select_width, height=select_height, command=lambda i=i: select_boat(boat_types[i]))
         boat_button[i].grid(row=0, column=i)
 
     # creating the chossing buttons for the selected player, basically the game board for the ships of the player
     for i in range(map_size):
         for j in range(map_size):
-            buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=10, height=5, command=lambda i=i, j=j: place_boat(i, j))
+            buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=board_button_width, height=board_button_height, command=lambda i=i, j=j: place_boat(i, j))
             buttons[int(current_player)-1][i][j].grid(row=i, column=j)
 
     # holding the screen until the player places all of his boats
@@ -449,6 +556,8 @@ which_tiles_tried = []
 tiles_hit = []
 tiles_of_sunken_boats = []
 number_of_players_boats = [[number_of_boats],[number_of_boats]]
+board_button_height = 0
+board_button_width = 0
 for i in range(num_of_players):
     tiles_hit.append([])
     which_tiles_tried.append([])
@@ -468,11 +577,25 @@ for i in range(num_of_players):
 window = tkinter.Tk()
 window.title("Battleships")
 window.geometry("800x600")
-window.resizable(False, False)
+window.resizable(True, True)
 window.iconbitmap("boat.ico")
+# setting the button height and width based on the window size
+button_width = int(window.winfo_height() // map_size /10)
+button_height = int(button_width // 5)
+#print(button_width, button_height)
+# setting the label size based on the window size
+main_label_size = int(window.winfo_height() // 20)
+# setting the board button height and width based on the window size and the map size
+board_button_width = int(window.winfo_height() // map_size /11)
+board_button_height = int(board_button_width // 2)
+#print(board_button_width, board_button_height)
+# setting the select button height and width based on the window size and the number of boats
+select_width = int(window.winfo_height() // number_of_boats / 11)
+select_height = int(select_width // 5)
+#print(select_width, select_height)
 
 # creating a top label for the game, displaying the current player
-main_label = tkinter.Label(window, text="Player " + current_player + "'s turn", font=("Arial", 20))
+main_label = tkinter.Label(window, text="Player " + current_player + "'s turn", font=("Arial", main_label_size))
 main_label.pack(side="top")
 
 # creating the game board
@@ -488,9 +611,9 @@ button_frame = tkinter.Frame(window)
 button_frame.pack(side="bottom")
 
 # creating the reset button and settings button
-reset_button = tkinter.Button(button_frame, text="Reset",width=10, height=2 ,command=lambda: reset())
+reset_button = tkinter.Button(button_frame, text="Reset",width=button_width, height=button_height ,command=lambda: reset())
 reset_button.grid(row=0, column=0)
-settings_button = tkinter.Button(button_frame, text="Settings", width=10, height=2, command=lambda: settings())
+settings_button = tkinter.Button(button_frame, text="Settings", width=button_width, height=button_height, command=lambda: settings())
 settings_button.grid(row=0, column=1)
 
 # first faze of the game, the placement of the boats
@@ -509,7 +632,7 @@ for widget in boat_frame.winfo_children():
 # the player that guesses all of the boats/tiles of the boats of the other player wins
 for i in range(map_size):
     for j in range(map_size):
-        buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=10, height=5, command=lambda i=i, j=j: button_pressed(i, j))
+        buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=board_button_width, height=board_button_height, command=lambda i=i, j=j: button_pressed(i, j))
         buttons[int(current_player)-1][i][j].grid(row=i, column=j)
     window.update()
     if current_player == players[0]:
