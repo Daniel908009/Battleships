@@ -2,7 +2,6 @@
 import tkinter
 import random
 import time
-import threading
 
 # function to reset the game
 def reset():
@@ -133,7 +132,7 @@ def info_win(player, black_tiles, red_tiles, blue_tiles):
         player1_guesses_frame.winfo_children()[tiles_of_sunken_boats[0][i][0]*map_size+tiles_of_sunken_boats[0][i][1]].config(bg="black")
     for i in range(len(tiles_of_sunken_boats[1])):
         player2_guesses_frame.winfo_children()[tiles_of_sunken_boats[1][i][0]*map_size+tiles_of_sunken_boats[1][i][1]].config(bg="black")
-        
+
     # creating a bottom label for the win info window
     bottom_label = tkinter.Label(win_info_window, text="Player 1 guesses X Player 2 guesses", font=("Arial", 12))
     bottom_label.pack()
@@ -205,37 +204,28 @@ def button_pressed(x, y):
                 # checking what ship has been hit
                 for j in range(len(coords_of_boats[int(other_player)-1])):
                     if [x, y] in coords_of_boats[int(other_player)-1][j]:
-                        #print("//////////////////////////")
-                        #print(coords_of_boats[int(other_player)-1][j].index([x, y]))
-                        #print("this is the index")
                         # finding how many tiles does the hit ship have
                         ship_size = len(coords_of_boats[int(other_player)-1][j])-1
-                        #print(str(ship_size) + " ship size")
-                        #print("//////////////////////////")
                         # checking if enough tiles have been hit to sink the ship
+                        print(ship_size)
                         if ship_size > len(tiles_hit[int(current_player)-1]):
-                            #print("Ship not sunken")
                             pass
                         else:
-                            # now checking if all the ships tiles are in the tiles_hit list if so the ship is sunken
+                            # now checking if all the tiles of the hitten ship have been hit, if yes then they will be added to the list of the sunken boats
                             temp = True
                             for k in range(len(coords_of_boats[int(other_player)-1][j])-1):
                                 if coords_of_boats[int(other_player)-1][j][k] not in tiles_hit[int(current_player)-1]:
                                     temp = False
                                     break
                             if temp:
-                                #print("Ship sunken")
-                                #number_of_players_boats[int(other_player)-1] = int(number_of_players_boats[int(other_player)-1] - 1)
+                                for k in range(len(coords_of_boats[int(other_player)-1][j])-1):
+                                    tiles_of_sunken_boats[int(current_player)-1].append(coords_of_boats[int(other_player)-1][j][k])
                                 number_of_players_boats[int(other_player)-1][0] -= 1
-                                # adding the tiles of the sunken boat to the tiles_of_sunken_boats list so they can be marked with black
-                                for k in range(len(coords_of_boats[int(current_player)-1][j])-1):
-                                    tiles_of_sunken_boats[int(current_player)-1].append(coords_of_boats[int(current_player)-1][j][k])
-                                #print("Boat sunken")
-                                #print(number_of_players_boats)
-                                #print(tiles_of_sunken_boats)
-                                #print("//////////////////////////")
+                                print("Boat sunk")
+                                print(number_of_players_boats)
+                                print(tiles_of_sunken_boats)
                                 break
-            else:
+                            
                 pass
     which_tiles_tried[int(current_player)-1].append([x, y])
     print(answer + " answer is this" )
@@ -459,6 +449,23 @@ def choose_faze():
             pass
         window.update()
 
+# function to remove the ships from the game board, if the player wants to place them again
+#def remove_ships():
+#    global possitions_of_boats, coords_of_boats, boats_placed
+#    boats_placed = 0
+#    for i in range(len(possitions_of_boats)):
+#        possitions_of_boats[i].clear()
+#        coords_of_boats[i].clear()
+#    for widget in frame.winfo_children():
+#        widget.destroy()
+#    for i in range(map_size):
+#        for j in range(map_size):
+#            buttons[int(current_player)-1][i][j] = tkinter.Button(frame, text=" ", width=10, height=5, command=lambda i=i, j=j: place_boat(i, j))
+#            buttons[int(current_player)-1][i][j].grid(row=i, column=j)
+#    choose_faze()
+#    remove_tiles()
+#    hold_screen()
+
 
 # variables for the map, players, buttons, etc.
 button_pressed_temp = False
@@ -525,20 +532,29 @@ reset_button = tkinter.Button(button_frame, text="Reset",width=10, height=2 ,com
 reset_button.grid(row=0, column=0)
 settings_button = tkinter.Button(button_frame, text="Settings", width=10, height=2, command=lambda: settings())
 settings_button.grid(row=0, column=1)
-remove_ships_button = tkinter.Button(button_frame, text="Remove ships", width=10, height=2)
-remove_ships_button.grid(row=0, column=2)
+#remove_ships_button = tkinter.Button(button_frame, text="Remove ships", width=10, height=2, command=lambda: remove_ships())
+#remove_ships_button.grid(row=0, column=2)
 
 # first faze of the game, the placement of the boats
 for i in range(num_of_players):
+    # needs to have a condition to check if the player has already placed his boats
+    #if len(coords_of_boats[i]) == 0:
+        #print("chosing fase")
+    current_player = players[i]
     choose_faze()
     remove_tiles()
     hold_screen()
+    #else:
+     #   pass
+    #choose_faze()
+    #remove_tiles()
+    #hold_screen()
 
 # half fazes of the game, deleting the buttons of the boat selection
 for widget in boat_frame.winfo_children():
     widget.destroy()
 
-remove_ships_button.grid_remove()
+#remove_ships_button.grid_remove()
 
 # second faze of the game, the actual game, 
 # players will take turns to guess the possition of the boats of the other player
