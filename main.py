@@ -1,7 +1,7 @@
 # necessary imports
 import tkinter
 import random
-import time
+#import threading
 
 # function to start a new game
 def new_game():
@@ -421,12 +421,28 @@ def is_straight(possitions):
             temp = False
     return temp
 
+# function to check if there was a problem found, if yes this function will clear the board and the lists of the selected tiles and list of the boat tiles
+#def problem_found_clear():
+ #   global problem_found
+  #  while True:
+   #     if problem_found:
+    #        for widget in frame.winfo_children():
+     #           widget.configure(bg="SystemButtonFace")
+      #      problem_found = False
+        #window.update()
+
 # function to place the boats on the game board
 def place_boat(x, y):
-    global boats_placed, current_player, boat_sizes, number_of_tiles_selected, buttons, boat_size, possitions_of_boats_temp, coords_of_boats, boat_select
+    global boats_placed, current_player, boat_sizes, number_of_tiles_selected, buttons, boat_size, possitions_of_boats_temp, coords_of_boats, boat_select, problem_found
+    #print(str(possitions_of_boats_temp) + " temp" )
+    #print(str(possitions_of_boats) + " boats")
     is_empty = True
     boat_size = 0
-    problem_found = False
+    #if problem_found:
+     #   print("problem found 3")
+      #  for widget in frame.winfo_children():
+       #     widget.configure(bg="SystemButtonFace")
+        #problem_found = False
     
     # finding the size of the selected boat, this will be used to check if the entire boat has been placed
     for i in range(len(boat_types)):
@@ -451,7 +467,7 @@ def place_boat(x, y):
                 #info_label_main.config(text="Boat already placed on this tile")
                 is_empty = True
             else:
-                print(possitions_of_boats_temp)
+                #print(possitions_of_boats_temp)
                 number_of_tiles_selected += 1
                 possitions_of_boats_temp.append([x, y])
                 buttons[int(current_player)-1][x][y].config(bg="green")
@@ -481,8 +497,16 @@ def place_boat(x, y):
                         #print("runned")
                     info_label_main.config(text="Boat is not straight")
                     #print(possitions_of_boats_temp)
+                    # clears the lists and resets the buttons, so that the player can place all the boats again
                     possitions_of_boats_temp.clear()
+                    #number_of_tiles_selected = 0
+                    #for widget in frame.winfo_children():
+                    #    widget.configure(bg="SystemButtonFace")
+                    #possitions_of_boats[int(current_player)-1].clear()
+                    #for i in range(len(boat_types)):
+                        #boat_button[i].config(state="active")
                     problem_found = True
+                    #print("problem found")
                     break
                 if tile_next_to_each_other(possitions_of_boats_temp) == False:
                     #print("Tiles are not next to each other")
@@ -491,16 +515,19 @@ def place_boat(x, y):
                     possitions_of_boats_temp.clear()
                     break
             window.update()
-
+        #print(str(possitions_of_boats_temp) + " temp 2" )
         # add the possitions of the boats to the actual list of the possitions of the boats(this is done because the positions are first checked if they are next to each other)    
         for i in range(len(possitions_of_boats_temp)):
             possitions_of_boats[int(current_player)-1].append(possitions_of_boats_temp[i])
-            if problem_found:
+            #print(problem_found)
+            #if problem_found:
+                #print("problem found 2")
                 # a certain amount of values will have to be removed from the possitions_of_boats list, based on the amount of tiles selected for the boat
                 #print(number_of_tiles_selected)
                 #print(possitions_of_boats)
-                for i in range(number_of_tiles_selected):
-                    possitions_of_boats[int(current_player)-1].pop()
+                #for i in range(number_of_tiles_selected):
+                    #possitions_of_boats[int(current_player)-1].pop()
+                    #print("popped")
             #print(possitions_of_boats)
         # checking if all the boats are placed, if so the function will return None
         if boats_placed == len(boat_types)-1:
@@ -509,8 +536,15 @@ def place_boat(x, y):
             return None
         possitions_of_boats_temp.clear()
         number_of_tiles_selected = 0
-        problem_found = False
+        #problem_found = False
         #print("rest of the code runned")
+        #print(str(possitions_of_boats_temp) + " temp 2" )
+        #print(str(possitions_of_boats) + " boats 2")
+        #if problem_found:
+         #   print("problem found 3")
+          #  for widget in frame.winfo_children():
+           #     widget.configure(bg="SystemButtonFace")
+            #problem_found = False
 
 # function to remove the tiles from the game board
 def remove_tiles():
@@ -598,9 +632,11 @@ possitions_of_boats_temp = []
 which_tiles_tried = []
 tiles_hit = []
 tiles_of_sunken_boats = []
+problem_found = False
 number_of_players_boats = [[number_of_boats],[number_of_boats]]
 board_button_height = 0
 board_button_width = 0
+#thread1 = threading.Thread(target=problem_found_clear)
 for i in range(num_of_players):
     tiles_hit.append([])
     which_tiles_tried.append([])
@@ -663,6 +699,7 @@ reset_button.grid(row=0, column=0)
 settings_button = tkinter.Button(button_frame, text="Settings", width=button_width, height=button_height, command=lambda: settings())
 settings_button.grid(row=0, column=1)
 
+#thread1.start()
 # first faze of the game, the placement of the boats
 for i in range(num_of_players):
     current_player = players[i]
