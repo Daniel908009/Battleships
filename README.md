@@ -23,7 +23,7 @@ Enjoy!<br>
 First click on the code button as shown in the picture bellow, then click the option Download ZIP <br>
 (https://github.com/user-attachments/assets/97260971-8446-437f-a28d-c041d6862256) <br>
 After its downloaded you can find it on your computer through file explorer. After you have found it right click it, it should display option called "Extract" <br>
-Click on it and wait a moment. A new directory should appear containing all the files neccesery for the game.<br>
+Click on it and wait a moment. A new directory should appear containing all the files neccesary for the game.<br>
 Now open a console and enter the folowing code: pip install -r /path/to/requirements.txt <br>
 *Replace the /path/to/requirements.txt with the actual path. <br>
 Enjoy the game! <br>
