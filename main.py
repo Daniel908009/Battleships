@@ -1,6 +1,8 @@
 # necessary imports
 import tkinter
 import random
+import os
+import sys
 
 # function to start a new game
 def new_game():
@@ -125,7 +127,7 @@ def settings():
     settings_window.title("Settings")
     settings_window.geometry("400x400")
     settings_window.resizable(False, False)
-    settings_window.iconbitmap("boat.ico")
+    settings_window.iconbitmap(os.path.join(base_path, "boat.ico"))
     # creating the main settings label
     settings_label = tkinter.Label(settings_window, text="Settings", font=("Arial", 20))
     settings_label.pack(side="top")
@@ -574,6 +576,10 @@ tiles_of_sunken_boats = []
 number_of_players_boats = [[number_of_boats],[number_of_boats]]
 board_button_height = 0
 board_button_width = 0
+if hasattr(sys, '_MEIPASS'):
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.abspath(".")
 
 for i in range(num_of_players):
     tiles_hit.append([])
@@ -595,7 +601,7 @@ window = tkinter.Tk()
 window.title("Battleships")
 window.geometry("800x600")
 window.resizable(True, True)
-window.iconbitmap("boat.ico")
+window.iconbitmap(os.path.join(base_path, "boat.ico"))
 # setting the button height and width based on the window size
 button_width = int(window.winfo_height() // map_size /10)
 button_height = int(button_width // 5)
