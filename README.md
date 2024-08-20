@@ -14,14 +14,14 @@ If the players want to reset the game they can press the reset button. <br>
 <h2>Using graphic UI</h2>
 <h3>Downloading EXE <h3>
 First make sure you have the latest release version selected <br>
-<br>
+(https://github.com/user-attachments/assets/76791904-efab-4235-a306-c7dbad307bad) <br>
 Then click on download exe file and wait until it downloads <br>
- <br>
+(https://github.com/user-attachments/assets/e5e959b5-faba-42a6-a82d-efc75b6be51e) <br>
 After its downloaded you can find it through file explorer or the browser it self. <br>
 Enjoy!<br>
 <h3>Downloading source code <h3>
 First click on the code button as shown in the picture bellow, then click the option Download ZIP <br>
- <br>
+(https://github.com/user-attachments/assets/97260971-8446-437f-a28d-c041d6862256) <br>
 After its downloaded you can find it on your computer through file explorer. After you have found it right click it, it should display option called "Extract" <br>
 Click on it and wait a moment. A new directory should appear containing all the files neccesery for the game.<br>
 Now open a console and enter the folowing code: pip install -r /path/to/requirements.txt <br>
@@ -37,4 +37,5 @@ Now open a console and enter the folowing code: pip install -r /path/to/requirem
 *Replace the /path/to/requirements.txt with the actual path. <br>
 Enjoy the game! <br>
 <h1>Screenshots of the game</h1>
- <br>
+(https://github.com/user-attachments/assets/1c668b46-9b6b-4d4f-914e-04550366a0bd) <br>
+(https://github.com/user-attachments/assets/a74b49e2-fb19-483c-b33a-01bb8a2f3234)
